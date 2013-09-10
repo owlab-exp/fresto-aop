@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<project name="Tomcat7 Weaving" default="compile" basedir="."
+	xmlns:aspectj="antlib:org.aspectj">
+<!-- Define the properties used by the build -->
+<property name="jar.name"      value="fresto-tomcat7-agent"/>
+<property name="build.home"    value="${basedir}/build"/>
+<property name="dist.home"     value="${basedir}/dist"/>
+<property name="docs.home"     value="${basedir}/docs"/>
+<property name="lib.home"     value="${basedir}/lib"/>
+<property name="src.home"      value="${basedir}/src"/>
+<property name="test.home"      value="${basedir}/test"/>
+<property name="tcserver.home"      value="/working/servers/tomcat7"/>
+
+<taskdef uri="antlib:org.aspectj" resource="org/aspectj/antlib.xml" classpath="${lib.home}/aspectjtools.jar"/>
+
+<target name="help">
+	<echo>You can use the following targets:</echo>
+	<echo> </echo>
+	<echo>  help    : (default) Prints this message </echo>
+	<echo>  all     : Cleans, compiles, packages, and deployes application</echo>
+	<echo>  clean   : Deletes work directories</echo>
+	<echo>  compile : Compiles servlets into class files</echo>
+	<echo>  dist    : Packages artifacts into a deployable JAR</echo>
+	<echo>  deploy  : Packages artifacts into a deployable JAR</echo>
+	<echo></echo>
+	<echo>For example, to clean, compile, and package all at once, run:</echo>
+	<echo>prompt> ant dist </echo>
+</target>
+
+<!-- Define the CLASSPATH -->
+<path id="compile.classpath">
+	<fileset dir="${tcserver.home}/bin">
+		<include name="*.jar"/>
+	</fileset>
+	<fileset dir="${tcserver.home}/lib">
+		<include name="*.jar"/>
+		<exclude name="${jar.name}.jar"/>
+	</fileset>
+	<pathelement location="${tcserver.home}/lib"/>
+	<fileset dir="${lib.home}">
+		<include name="*.jar"/>
+	</fileset>
+</path>
+
+<target name="all" depends="clean,compile,dist,deploy" description="Clean work dirs, then compile create a JAR, and deploy"/>
+
+<target name="clean" description="Delete old build and dist directories">
+	<delete dir="${build.home}"/>
+	<delete dir="${dist.home}"/>
+</target>
+
+<target name="prepare" depends="clean" description="Create working dirs and copy static files to work dir">
+	<mkdir  dir="${build.home}"/>
+	<!-- Copy static HTML and JSP files to work dir -->
+	<copy todir="${build.home}">
+		<fileset dir="${src.home}/resources"/>
+	</copy>
+</target>
+
+<target name="compile" depends="prepare" description="Compile Java sources onto build dir">
+	<aspectj:iajc source="1.5" srcdir="${src.home}/java" destDir="${build.home}">
+	<!--javac srcdir="${src.home}/java" destdir="${build.home}"-->
+		<classpath refid="compile.classpath"/>
+	<!--/javac-->
+	</aspectj:iajc>
+	<!--
+	<copy  todir="${build.home}/classes">
+		<fileset dir="${src.home}/java" excludes="**/*.java"/>
+	</copy>
+	-->
+</target>
+
+<target name="dist" depends="compile" description="Create JAR file for binary distribution">
+	<mkdir  dir="${dist.home}"/>
+	<jar jarfile="${dist.home}/${jar.name}.jar" basedir="${build.home}"/>
+</target>
+
+<target name="deploy" depends="dist" description="Deploy on TCServer Library Directory">
+	<copy todir="${tcserver.home}/lib" overwrite="true" flatten="true">
+		<file file="${dist.home}/${jar.name}.jar"/>
+	</copy>
+</target>
+
+</project> 
