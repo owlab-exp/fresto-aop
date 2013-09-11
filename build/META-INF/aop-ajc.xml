@@ -1,8 +1,11 @@
 <aspectj>
 	<aspects>
 		<!--aspect name="SimplePerfEventEmitter"/-->
-		<aspect name="fresto.monitor.servlet.HttpServletMonitor"/>
+		<aspect name="fresto.aspects.HttpServletMonitor"/>
 	</aspects>
+	<!--
+	<weaver options=" -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true">
+	-->
 	<weaver options="-verbose -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true">
 	</weaver>
 </aspectj>

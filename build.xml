@@ -58,7 +58,7 @@
 </target>
 
 <target name="compile" depends="prepare" description="Compile Java sources onto build dir">
-	<aspectj:iajc source="1.5" srcdir="${src.home}/java" destDir="${build.home}">
+	<aspectj:iajc source="1.6" srcdir="${src.home}/java" destDir="${build.home}">
 	<!--javac srcdir="${src.home}/java" destdir="${build.home}"-->
 		<classpath refid="compile.classpath"/>
 	<!--/javac-->
@@ -79,6 +79,10 @@
 	<copy todir="${tcserver.home}/lib" overwrite="true" flatten="true">
 		<file file="${dist.home}/${jar.name}.jar"/>
 	</copy>
+</target>
+
+<target name="undeploy"  description="Un-Deploy on TCServer Library Directory">
+	<delete file="${tcserver.home}/lib/${jar.name}.jar"/>
 </target>
 
 </project> 
