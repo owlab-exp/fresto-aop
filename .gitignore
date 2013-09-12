@@ -2,3 +2,7 @@
 *.log
 *.zip
 *.gz
+*/*.bak/*
+*.bak
+build/*
+dist/*

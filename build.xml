@@ -7,6 +7,7 @@
 <property name="dist.home"     value="${basedir}/dist"/>
 <property name="docs.home"     value="${basedir}/docs"/>
 <property name="lib.home"     value="${basedir}/lib"/>
+<property name="lib-spring.home"     value="${basedir}/lib-spring"/>
 <property name="src.home"      value="${basedir}/src"/>
 <property name="test.home"      value="${basedir}/test"/>
 <property name="tcserver.home"      value="/working/servers/tomcat7"/>
@@ -40,6 +41,9 @@
 	<fileset dir="${lib.home}">
 		<include name="*.jar"/>
 	</fileset>
+	<fileset dir="${lib-spring.home}">
+		<include name="*.jar"/>
+	</fileset>
 </path>
 
 <target name="all" depends="clean,compile,dist,deploy" description="Clean work dirs, then compile create a JAR, and deploy"/>
@@ -53,7 +57,7 @@
 	<mkdir  dir="${build.home}"/>
 	<!-- Copy static HTML and JSP files to work dir -->
 	<copy todir="${build.home}">
-		<fileset dir="${src.home}/resources"/>
+		<fileset dir="${src.home}/resource"/>
 	</copy>
 </target>
 
