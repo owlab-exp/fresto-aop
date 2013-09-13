@@ -8,7 +8,9 @@
 <property name="docs.home"     value="${basedir}/docs"/>
 <property name="lib.home"     value="${basedir}/lib"/>
 <property name="lib-spring.home"     value="${basedir}/lib-spring"/>
+<property name="lib-thrift.home"     value="${basedir}/fresto-events/lib"/>
 <property name="src.home"      value="${basedir}/src"/>
+<property name="src.fresto-events.home"      value="${basedir}/fresto-events/gen-java"/>
 <property name="test.home"      value="${basedir}/test"/>
 <property name="tcserver.home"      value="/working/servers/tomcat7"/>
 
@@ -44,6 +46,9 @@
 	<fileset dir="${lib-spring.home}">
 		<include name="*.jar"/>
 	</fileset>
+	<fileset dir="${lib-thrift.home}">
+		<include name="*.jar"/>
+	</fileset>
 </path>
 
 <target name="all" depends="clean,compile,dist,deploy" description="Clean work dirs, then compile create a JAR, and deploy"/>
@@ -62,7 +67,14 @@
 </target>
 
 <target name="compile" depends="prepare" description="Compile Java sources onto build dir">
+	<!--
 	<aspectj:iajc source="1.6" srcdir="${src.home}/java" destDir="${build.home}">
+	-->
+	<aspectj:iajc source="1.6" destDir="${build.home}">
+		<sourceroots>
+			<pathelement location="${src.home}/java"/>
+			<pathelement location="${src.fresto-events.home}"/>
+		</sourceroots>
 	<!--javac srcdir="${src.home}/java" destdir="${build.home}"-->
 		<classpath refid="compile.classpath"/>
 	<!--/javac-->

@@ -9,22 +9,27 @@ import org.springframework.web.servlet.FrameworkServlet;
 
 public aspect HttpServletRequestMonitor {
 
-    /** In case of Spring Framework application, all servlet request handled by FrameworkServler */
-    public pointcut frameworkServletService(HttpServletRequest request, HttpServletResponse response) :
-    	execution(void FrameworkServlet.service(HttpServletRequest, HttpServletResponse)) && args (request, response);
-
-    Object around(HttpServletRequest request, HttpServletResponse response):
-    	frameworkServletService(request, response) {
-	    System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
-
-	    workOnRequest(request);
-
-	    Object result = proceed(request, response);
-
-	    workOnResponse(response);
-
-	    return result;
-	}
+//    /** In case of Spring Framework application, all servlet request handled by FrameworkServler */
+//    public pointcut frameworkServletService(HttpServletRequest request, HttpServletResponse response) :
+//    	execution(void FrameworkServlet.service(HttpServletRequest, HttpServletResponse)) && args (request, response);
+//
+//    Object around(HttpServletRequest request, HttpServletResponse response):
+//    	frameworkServletService(request, response) {
+//	    System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+//
+//
+//	    FrestoTracker.createFrestoContext(request.getHeader("fresto-uuid"));
+//	    // Just before proceed
+//	    FrestoTracker.beginTrack();
+//
+//	    Object result = proceed(request, response);
+//
+//	    // Just after proceed
+//	    FrestoTracker.endTrack();
+//
+//
+//	    return result;
+//	}
 	
     /** To Capture JSP page call */
     public pointcut httpJspPageService(HttpServletRequest request, HttpServletResponse response) :
@@ -35,11 +40,12 @@ public aspect HttpServletRequestMonitor {
     	httpJspPageService(request, response) {
              System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
-             workOnRequest(request);
+	     FrestoTracker.createFrestoContext(request.getHeader("fresto-uuid"));
+	     FrestoTracker.beginTrack();
 
              Object result = proceed(request, response);
 
-             workOnResponse(response);
+	     FrestoTracker.endTrack();
 
              return result;
          }
@@ -54,18 +60,15 @@ public aspect HttpServletRequestMonitor {
          System.out.println("[localPort] " + request.getLocalPort());
          System.out.println("[remoteAddr] " + request.getRemoteAddr());
 
-	 FrestoContext fc = FrestoContext.createInstance(request.getHeader("fresto-uuid"));
-	 fc.increaseDepth();
-	 FrestoTracker.set(fc);
+	 //FrestoContext fc = FrestoContext.createInstance(request.getHeader("fresto-uuid"));
     }
 
     public void workOnResponse(HttpServletResponse response) {
          System.out.println("[SC] " + response.getStatus());
 
-	 FrestoTracker.get().decreaseDepth();
-	 System.out.println("[Depth] " + FrestoTracker.get().getDepth());
-	 if(FrestoTracker.get().getDepth() == -1) {
-	     FrestoTracker.unset();
-	 }
+	 //FrestoTracker.get().decreaseDepth();
+	 //if(FrestoTracker.get().getDepth() == -1) {
+	 //    FrestoTracker.unset();
+	 //}
     }
 }

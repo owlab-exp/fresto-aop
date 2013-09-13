@@ -11,8 +11,10 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
+import java.util.logging.Logger;
 
 public aspect SpringMVCMonitor {
+    private static Logger LOGGER = Logger.getLogger("SpringMVCMonitor");
 
 
     /** */
@@ -38,57 +40,64 @@ public aspect SpringMVCMonitor {
 
     Object around() :
 	springControllerHandle() {
-	    System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
-	    return proceed();
+	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+
+	    FrestoTracker.beginTrack();
+	    Object result = proceed();
+	    FrestoTracker.endTrack();
+
+	    return result;
 	}
 
     Object around() :
 	springDomainService() {
-	    System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
-	    return proceed();
+	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+
+	    FrestoTracker.beginTrack();
+	    Object result = proceed();
+	    FrestoTracker.endTrack();
+
+	    return result;
 	}
 
     Object around(String methodName, HttpServletRequest request, HttpServletResponse response) :
     	springMultiActionInvokeMethodName(methodName, request, response) {
-	    System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
-	    System.out.println("[methodName] " + methodName);
+	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
-	    workOnRequest(request);
-
+	    FrestoTracker.beginTrack();
 	    Object result = proceed(methodName, request, response);
-
-	    workOnResponse(response);
+	    FrestoTracker.endTrack();
 
 	    return result;
+
+
 	}
 
     Object around(HttpServletRequest request, HttpServletResponse response):
     	//springMultiAction(request, response) {
     	//springController(request, response) {
     	springHandle(request, response) {
-	    System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
-	    workOnRequest(request);
-
+	    FrestoTracker.beginTrack();
 	    Object result = proceed(request, response);
-
-	    workOnResponse(response);
+	    FrestoTracker.endTrack();
 
 	    return result;
 	}
 	
-    public void workOnRequest(HttpServletRequest request) {
-         System.out.println("[contextPath] " + request.getContextPath());
-         System.out.println("[fresto-uuid] " + request.getHeader("fresto-uuid"));
-         System.out.println("[requestURI] " + request.getRequestURI());
-         System.out.println("[requestURL] " + request.getRequestURL().toString());
-         System.out.println("[servletPath] " + request.getServletPath());
-         System.out.println("[localName] " + request.getLocalName());
-         System.out.println("[localPort] " + request.getLocalPort());
-         System.out.println("[remoteAddr] " + request.getRemoteAddr());
-    }
-
-    public void workOnResponse(HttpServletResponse response) {
-         System.out.println("[SC] " + response.getStatus());
-    }
+//    public void workOnRequest(HttpServletRequest request) {
+//         System.out.println("[contextPath] " + request.getContextPath());
+//         System.out.println("[fresto-uuid] " + request.getHeader("fresto-uuid"));
+//         System.out.println("[requestURI] " + request.getRequestURI());
+//         System.out.println("[requestURL] " + request.getRequestURL().toString());
+//         System.out.println("[servletPath] " + request.getServletPath());
+//         System.out.println("[localName] " + request.getLocalName());
+//         System.out.println("[localPort] " + request.getLocalPort());
+//         System.out.println("[remoteAddr] " + request.getRemoteAddr());
+//    }
+//
+//    public void workOnResponse(HttpServletResponse response) {
+//         System.out.println("[SC] " + response.getStatus());
+//    }
 }
