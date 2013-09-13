@@ -1,0 +1,35 @@
+<aspectj>
+	<aspects>
+		<aspect name="fresto.aspects.HttpServletRequestMonitor"/>
+		<aspect name="fresto.aspects.SpringMVCMonitor"/>
+		<!-- preparatio -->
+		<!--
+		<aspect name="fresto.aspects.HttpServletMonitor"/>
+		<aspect name="fresto.aspects.SpringMvcMonitor"/>
+		<aspect name="fresto.aspects.JdbcStatementMonitor"/>
+		-->
+	</aspects>
+	<!--
+	<weaver options=" -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true">
+	-->
+	<weaver options=" -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true
+			-proceedOnError -Xlintfile:META-INF/Xlint.properties">
+	<!--
+	<weaver options="-verbose -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true
+			-proceedOnError -Xlintfile:META-INF/Xlint.properties">
+			-->
+		<exclude within="org.apache.catalina..*"/>
+		<exclude within="org.apache.coyote..*"/>
+		<exclude within="org.apache.jasper..*"/>
+		<exclude within="org.apache.tomcat.util..*"/>
+		<exclude within="org.apache.naming..*"/>
+		<exclude within="org.apache.log4j..*"/>
+		<exclude within="org.springframework.jmx..*"/>
+		<exclude within="org.springframework.aop..*"/>
+		<exclude within="net.sf.cglib..*"/>
+
+		<exclude within="net.bull.javamelody..*"/>
+		<exclude within="fresto.aspects..*"/>
+	</weaver>
+</aspectj>
+
