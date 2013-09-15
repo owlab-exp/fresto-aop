@@ -26,7 +26,7 @@ public class FrestoContext {
 
     private static String pubHost = "fresto1.owlab.com";
     private static int pubPort = 7002;
-    private static ZMQ.Context zmqContext = ZMQ.context(1);
+    private ZMQ.Context zmqContext; //= ZMQ.context(1);
     private ZMQ.Socket publisher;
 
     private TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
@@ -37,7 +37,8 @@ public class FrestoContext {
 
 	this.uuidCreator = uuidCreator;
 
-	this.publisher = zmqContext.socket(ZMQ.PUB);
+	this.zmqContext = ZMQ.context(1);
+	this.publisher = this.zmqContext.socket(ZMQ.PUB);
 	this.publisher.connect("tcp://" + pubHost + ":" + pubPort);
 
 	LOGGER.info("JeroMQ publisher uses " + pubHost + ":" + pubPort );
@@ -46,10 +47,12 @@ public class FrestoContext {
     }
 
     public static FrestoContext createInstance(String uuid) {
+	LOGGER.info("uuid: " + uuid);
 	return new FrestoContext(uuid, FrestoContext.UUID_CREATOR_UI);
     }
 
     public static FrestoContext createInstance() {
+	LOGGER.info("no uuid");
 	return new FrestoContext(UUID.randomUUID().toString(), FrestoContext.UUID_CREATOR_AP);
     }
 
@@ -114,11 +117,14 @@ public class FrestoContext {
 	    eventBytes = serializer.serialize(base);
 	} catch(TException te) {
 	    LOGGER.warning("TSerializer exception: " + te.getMessage());
+	    return;
 	}
 	
 	//byte[] serializedEvent = serializer.serialize(httpServletRequestEvent);
+	LOGGER.info("eventBytes: " + eventBytes.length + " bytes");
 	this.publisher.send(envelope.getBytes(), ZMQ.SNDMORE);
 	this.publisher.send(eventBytes, 0);
+	LOGGER.info("Event sent");
 	
     }
 }

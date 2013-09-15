@@ -1,5 +1,7 @@
 package fresto.aspects;
 
+import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -8,6 +10,7 @@ import javax.servlet.jsp.HttpJspPage;
 import org.springframework.web.servlet.DispatcherServlet;
 
 public aspect DispatcherServletMonitor {
+    private static Logger _logger = Logger.getLogger("DispathcServletMonitor");
 
     /** In case of Spring Framework application, all servlet request handled by DispatcherServlet */
     public pointcut dispatcherServletService(HttpServletRequest request, HttpServletResponse response) :
@@ -15,9 +18,19 @@ public aspect DispatcherServletMonitor {
 
     Object around(HttpServletRequest request, HttpServletResponse response):
     	dispatcherServletService(request, response) {
-	    System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    
+	    //System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    _logger.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
-	    FrestoTracker.createFrestoContext(request.getHeader("fresto-uuid"));
+	    String frestoUuid = request.getHeader("fresto-uuid");
+	    if(frestoUuid != null)
+	    	FrestoTracker.createFrestoContext(request.getHeader("fresto-uuid"));
+	    else 
+		FrestoTracker.createFrestoContext();
+	    _logger.info("FrestoContext created");
+
+	    FrestoTracker.captureHttpServletRequest(request);
+	    _logger.info("HttpServletRequest captured");
 	    FrestoTracker.beginTrack();
 
 	    Object result = proceed(request, response);
@@ -25,7 +38,6 @@ public aspect DispatcherServletMonitor {
 	    // Just after proceed
 	    FrestoTracker.endTrack();
 
-//	    workOnResponse(response);
 
 	    return result;
 	}

@@ -4,6 +4,8 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import fresto.event.HttpRequestEvent;
+
 public class FrestoTracker {
 	private static Logger LOGGER = Logger.getLogger("FrestoTracker");
 
@@ -74,7 +76,20 @@ public class FrestoTracker {
 		return;
 	    }
 
-	    FrestoTracker.get().increaseDepth();
+	    HttpRequestEvent httpRequestEvent = new HttpRequestEvent(
+		request.getMethod(),
+		request.getLocalName(),
+		request.getLocalPort(),
+		request.getContextPath(),
+		request.getServletPath(),
+		//request.getHeader("fresto-uuid"),
+		FrestoTracker.get().getUuid(),
+		System.currentTimeMillis()
+		);
+	    FrestoTracker.get().publishEventToMonitor("H", httpRequestEvent);
+	    LOGGER.info("HttpServlerRequest event sent");
+
+
 	}
 
 	public static void captureHttpServletResponse(HttpServletResponse response) {
@@ -83,13 +98,6 @@ public class FrestoTracker {
 		return;
 	    }
 
-	    // decrease depth of context object
-	    int depth = FrestoTracker.get().decreaseDepth();
-	    if(depth == 0) {
-		// Call close to close the ZMQ socket
-		FrestoTracker.get().close();
-		FrestoTracker.unset();
-	    }
 	}
 
 }

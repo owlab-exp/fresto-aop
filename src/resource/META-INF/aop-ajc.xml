@@ -16,13 +16,11 @@
 	</aspects>
 	<!--
 	<weaver options=" -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true">
-	-->
 	<weaver options=" -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true
 			-proceedOnError -Xlintfile:META-INF/Xlint.properties">
-	<!--
+	-->
 	<weaver options="-verbose -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true
 			-proceedOnError -Xlintfile:META-INF/Xlint.properties">
-			-->
 		<exclude within="org.apache.catalina..*"/>
 		<exclude within="org.apache.coyote..*"/>
 		<exclude within="org.apache.jasper..*"/>
