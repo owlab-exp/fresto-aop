@@ -5,12 +5,14 @@
 		<aspect name="fresto.aspects.HttpServletRequestMonitor"/>
 		-->
 		<aspect name="fresto.aspects.SpringMVCMonitor"/>
+		<aspect name="fresto.aspects.DAOMonitor"/>
 		<!-- preparatio -->
 		<!--
 		<aspect name="fresto.aspects.HttpServletMonitor"/>
 		<aspect name="fresto.aspects.SpringMvcMonitor"/>
-		<aspect name="fresto.aspects.JdbcStatementMonitor"/>
 		-->
+		<aspect name="fresto.aspects.JdbcConnectionMonitor"/>
+		<aspect name="fresto.aspects.JdbcStatementMonitor"/>
 	</aspects>
 	<!--
 	<weaver options=" -Xset:weaveJavaxPackages=true -Xset:weaveJavaPackages=true">
@@ -32,6 +34,7 @@
 		<exclude within="net.sf.cglib..*"/>
 
 		<exclude within="net.bull.javamelody..*"/>
+
 		<exclude within="fresto.aspects..*"/>
 	</weaver>
 </aspectj>

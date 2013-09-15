@@ -86,18 +86,4 @@ public aspect SpringMVCMonitor {
 	    return result;
 	}
 	
-//    public void workOnRequest(HttpServletRequest request) {
-//         System.out.println("[contextPath] " + request.getContextPath());
-//         System.out.println("[fresto-uuid] " + request.getHeader("fresto-uuid"));
-//         System.out.println("[requestURI] " + request.getRequestURI());
-//         System.out.println("[requestURL] " + request.getRequestURL().toString());
-//         System.out.println("[servletPath] " + request.getServletPath());
-//         System.out.println("[localName] " + request.getLocalName());
-//         System.out.println("[localPort] " + request.getLocalPort());
-//         System.out.println("[remoteAddr] " + request.getRemoteAddr());
-//    }
-//
-//    public void workOnResponse(HttpServletResponse response) {
-//         System.out.println("[SC] " + response.getStatus());
-//    }
 }

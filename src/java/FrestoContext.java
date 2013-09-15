@@ -3,6 +3,15 @@ package fresto.aspects;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.Context;
+import org.zeromq.ZMQ.Socket;
+
+import org.apache.thrift.TSerializer;
+import org.apache.thrift.TBase;
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+
 public class FrestoContext {
     private static Logger LOGGER = Logger.getLogger("FrestoContext");
 
@@ -15,10 +24,24 @@ public class FrestoContext {
 
     private int depth = 0;
 
+    private static String pubHost = "fresto1.owlab.com";
+    private static int pubPort = 7002;
+    private static ZMQ.Context zmqContext = ZMQ.context(1);
+    private ZMQ.Socket publisher;
+
+    private TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
+
     private FrestoContext(String uuid, int uuidCreator) {
 	LOGGER.info("uuid: " + uuid + ", uuidCreator: " + uuidCreator);
 	this.uuid = uuid;
+
 	this.uuidCreator = uuidCreator;
+
+	this.publisher = zmqContext.socket(ZMQ.PUB);
+	this.publisher.connect("tcp://" + pubHost + ":" + pubPort);
+
+	LOGGER.info("JeroMQ publisher uses " + pubHost + ":" + pubPort );
+
 	this.isInitialized = true;
     }
 
@@ -29,10 +52,16 @@ public class FrestoContext {
     public static FrestoContext createInstance() {
 	return new FrestoContext(UUID.randomUUID().toString(), FrestoContext.UUID_CREATOR_AP);
     }
+
+    public void close() {
+	LOGGER.info("Closing ZMQ socket");
+	this.publisher.close();
+	this.zmqContext.term();
+    }
     
     public int getUUIDCreator() {
 	if(!isInitialized) {
-	    LOGGER.severe("FrestoContext is not initialized");
+	    LOGGER.warning("FrestoContext is not initialized");
 	    return -1;
 	}
 	return this.uuidCreator;
@@ -40,7 +69,7 @@ public class FrestoContext {
 
     public String getUuid() {
 	if(!isInitialized) {
-	    LOGGER.severe("FrestoContext is not initialized");
+	    LOGGER.warning("FrestoContext is not initialized");
 	    return null;
 	}
 	return this.uuid;
@@ -48,7 +77,7 @@ public class FrestoContext {
 
     public int increaseDepth() {
 	if(!isInitialized) {
-	    LOGGER.severe("FrestoContext is not initialized");
+	    LOGGER.warning("FrestoContext is not initialized");
 	    return -1;
 	}
 	depth++;
@@ -58,7 +87,7 @@ public class FrestoContext {
 
     public int decreaseDepth() {
 	if(!isInitialized) {
-	    LOGGER.severe("FrestoContext is not initialized");
+	    LOGGER.warning("FrestoContext is not initialized");
 	    return -1;
 	}
 	depth--;
@@ -68,9 +97,28 @@ public class FrestoContext {
 
     public int getDepth() {
 	if(!isInitialized) {
-	    LOGGER.severe("FrestoContext is not initialized");
+	    LOGGER.warning("FrestoContext is not initialized");
 	    return -1;
 	}
 	return this.depth;
+    }
+
+    public void publishEventToMonitor(String envelope, TBase base) {
+	if(!isInitialized) {
+	    LOGGER.warning("FrestoContext is not initialized");
+	    return;
+	}
+
+	byte[] eventBytes = null;
+	try {
+	    eventBytes = serializer.serialize(base);
+	} catch(TException te) {
+	    LOGGER.warning("TSerializer exception: " + te.getMessage());
+	}
+	
+	//byte[] serializedEvent = serializer.serialize(httpServletRequestEvent);
+	this.publisher.send(envelope.getBytes(), ZMQ.SNDMORE);
+	this.publisher.send(eventBytes, 0);
+	
     }
 }
