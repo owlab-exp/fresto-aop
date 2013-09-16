@@ -88,7 +88,9 @@ public class FrestoTracker {
 		);
 	    // Publish this event to monitoring server
 	    LOGGER.info("HttpServletRequest event: sending");
-	    FrestoTracker.get().publishEventToMonitor("H", httpRequestEvent);
+	    //FrestoTracker.get().publishEventToMonitor("H", httpRequestEvent);
+	    FrestoContextGlobal frestoContextGlobal = (FrestoContextGlobal) (request.getSession().getServletContext().getAttribute("frestoContextGlobal"));
+	    frestoContextGlobal.publishEventToMonitor("H", httpRequestEvent);
 	    LOGGER.info("HttpServletRequest event: sent");
 
 
