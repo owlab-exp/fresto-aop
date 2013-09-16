@@ -24,13 +24,13 @@ public class FrestoContext {
 
     private int depth = 0;
 
-    private static String pubHost = "fresto1.owlab.com";
-    //private static String pubHost = "*";
-    private static int pubPort = 7002;
-    private ZMQ.Context zmqContext; //= ZMQ.context(1);
-    private ZMQ.Socket publisher;
+    //private static String pubHost = "fresto1.owlab.com";
+    ////private static String pubHost = "*";
+    //private static int pubPort = 7002;
+    //private ZMQ.Context zmqContext; //= ZMQ.context(1);
+    //private ZMQ.Socket publisher;
 
-    private TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
+    //private TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
 
     private FrestoContext(String uuid, int uuidCreator) {
 	LOGGER.fine("uuid: " + uuid + ", uuidCreator: " + uuidCreator);
@@ -65,9 +65,9 @@ public class FrestoContext {
 	    LOGGER.warning("FrestoContext is not initialized");
 	    return;
 	}
-	LOGGER.fine("Closing ZMQ socket");
-	this.publisher.close();
-	this.zmqContext.term();
+	//LOGGER.fine("Closing ZMQ socket");
+	//this.publisher.close();
+	//this.zmqContext.term();
     }
     
     public int getUUIDCreator() {

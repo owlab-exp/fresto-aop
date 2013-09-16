@@ -62,6 +62,8 @@ public class FrestoTracker {
 		return;
 	    }
 	    // decrease depth of context object
+
+	    LOGGER.info("FrestoCotnext exists");
 	    int depth = FrestoTracker.get().decreaseDepth();
 	    if(depth == 0) {
 		// Call close to close the ZMQ socket
@@ -70,7 +72,7 @@ public class FrestoTracker {
 	    }
 	}
 
-	public static void captureHttpServletRequest(HttpServletRequest request) {
+	public static void captureHttpServletRequest(HttpServletRequest request, String typeName, String signatureName) {
 	    if(!frestoContextExists) {
 		LOGGER.warning("FrestoContext does not exists");
 		return;
@@ -84,6 +86,8 @@ public class FrestoTracker {
 		request.getServletPath(),
 		//request.getHeader("fresto-uuid"),
 		FrestoTracker.get().getUuid(),
+		typeName,
+		signatureName,
 		System.currentTimeMillis()
 		);
 	    // Publish this event to monitoring server

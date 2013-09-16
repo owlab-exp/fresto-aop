@@ -16,7 +16,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.context.ContextLoaderListener;
 
 public aspect DispatcherServletMonitor {
-    private static Logger _logger = Logger.getLogger("DispathcServletMonitor");
+    private static Logger LOGGER = Logger.getLogger("DispathcServletMonitor");
 
     /** To weave in ContextLoaderServlet Init */
     /** Deprecated for since Servlet API 2.4 */
@@ -25,7 +25,7 @@ public aspect DispatcherServletMonitor {
 //
 //    Object around():
 //    	contextLoaderServletInit() {
-//	    _logger.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+//	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 //	    Object result = proceed();
 //	    return result;
 //	}
@@ -35,7 +35,7 @@ public aspect DispatcherServletMonitor {
     
     Object around(ServletContextEvent event) :
     	contextLoaderListenerInitialized(event) {
-	    _logger.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 	    // To store values to servlet context
 	    // Mainly for ZMQ now
 	    ServletContext servletContext = event.getServletContext();
@@ -51,7 +51,7 @@ public aspect DispatcherServletMonitor {
     
     Object around(ServletContextEvent event) :
     	contextLoaderListenerDestroyed(event) {
-	    _logger.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
 	    // To store values to servlet context
 	    // Mainly for ZMQ closing now
@@ -71,7 +71,7 @@ public aspect DispatcherServletMonitor {
 
     Object around():
     	genericServletInit() {
-	    _logger.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 	    Object result = proceed();
 	    return result;
 	}
@@ -82,7 +82,7 @@ public aspect DispatcherServletMonitor {
 
     Object around():
     	genericServletDestory() {
-	    _logger.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 	    Object result = proceed();
 	    return result;
 	}
@@ -95,26 +95,30 @@ public aspect DispatcherServletMonitor {
     	dispatcherServletService(request, response) {
 	    
 	    //System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
-	    _logger.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[thisJoinPoint.getSignature.declaringTypeName] " + thisJoinPoint.getSignature().getDeclaringTypeName());
+	    LOGGER.info("[thisJoinPoint.getSignature.name] " + thisJoinPoint.getSignature().getName());
 
 	    String frestoUuid = request.getHeader("fresto-uuid");
 	    if(frestoUuid != null)
 	    	FrestoTracker.createFrestoContext(request.getHeader("fresto-uuid"));
 	    else 
 		FrestoTracker.createFrestoContext();
-	    _logger.info("FrestoContext created");
+	    LOGGER.info("FrestoContext created");
 
-	    FrestoTracker.captureHttpServletRequest(request);
-	    _logger.info("HttpServletRequest captured");
+	    FrestoTracker.captureHttpServletRequest(request, thisJoinPoint.getSignature().getDeclaringTypeName(), thisJoinPoint.getSignature().getName());
+	    LOGGER.info("HttpServletRequest captured");
 
 	    FrestoTracker.beginTrack();
 
+	    LOGGER.info("Before proceed");
 	    Object result = proceed(request, response);
+	    LOGGER.info("After proceed");
 
 	    // Just after proceed
 	    FrestoTracker.endTrack();
 
 
+	    LOGGER.info("Before return");
 	    return result;
 	}
 }
