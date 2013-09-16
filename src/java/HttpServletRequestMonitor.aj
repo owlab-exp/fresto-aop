@@ -40,7 +40,8 @@ public aspect HttpServletRequestMonitor {
     	httpJspPageService(request, response) {
              System.out.println("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
-	     FrestoTracker.createFrestoContext(request.getHeader("fresto-uuid"));
+	     FrestoContextGlobal frestoContextGlobal = (FrestoContextGlobal) (request.getSession().getServletContext().getAttribute("frestoContextGlobal"));
+	     FrestoTracker.createFrestoContext(frestoContextGlobal, request.getHeader("fresto-uuid"));
 	     FrestoTracker.beginTrack();
 
              Object result = proceed(request, response);

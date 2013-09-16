@@ -24,6 +24,8 @@ public class FrestoContext {
 
     private int depth = 0;
 
+    private FrestoContextGlobal frestoContextGlobal;
+
     //private static String pubHost = "fresto1.owlab.com";
     ////private static String pubHost = "*";
     //private static int pubPort = 7002;
@@ -32,11 +34,12 @@ public class FrestoContext {
 
     //private TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
 
-    private FrestoContext(String uuid, int uuidCreator) {
+    private FrestoContext(FrestoContextGlobal frestoContextGlobal, String uuid, int uuidCreator) {
 	LOGGER.fine("uuid: " + uuid + ", uuidCreator: " + uuidCreator);
 	this.uuid = uuid;
 
 	this.uuidCreator = uuidCreator;
+	this.frestoContextGlobal = frestoContextGlobal;
 
 //	this.zmqContext = ZMQ.context(1);
 //	this.publisher = this.zmqContext.socket(ZMQ.PUB);
@@ -50,14 +53,18 @@ public class FrestoContext {
 	this.isInitialized = true;
     }
 
-    public static FrestoContext createInstance(String uuid) {
+    public static FrestoContext createInstance(FrestoContextGlobal frestoContextGlobal, String uuid) {
 	LOGGER.fine("uuid: " + uuid);
-	return new FrestoContext(uuid, FrestoContext.UUID_CREATOR_UI);
+	return new FrestoContext(frestoContextGlobal, uuid, FrestoContext.UUID_CREATOR_UI);
     }
 
-    public static FrestoContext createInstance() {
+    public static FrestoContext createInstance(FrestoContextGlobal frestoContextGlobal) {
 	LOGGER.fine("no uuid");
-	return new FrestoContext(UUID.randomUUID().toString(), FrestoContext.UUID_CREATOR_AP);
+	return new FrestoContext(frestoContextGlobal, UUID.randomUUID().toString(), FrestoContext.UUID_CREATOR_AP);
+    }
+
+    public FrestoContextGlobal getFrestoContextGlobal() {
+	return this.frestoContextGlobal;
     }
 
     public void close() {

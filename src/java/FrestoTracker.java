@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import fresto.event.HttpRequestEvent;
+import fresto.event.HttpResponseEvent;
 
 public class FrestoTracker {
 	private static Logger LOGGER = Logger.getLogger("FrestoTracker");
@@ -37,13 +38,13 @@ public class FrestoTracker {
 
 
 	//Fcacade
-	public static void createFrestoContext(String uuid) {
-	    FrestoContext fc = FrestoContext.createInstance(uuid);
+	public static void createFrestoContext(FrestoContextGlobal frestoContextGlobal, String uuid) {
+	    FrestoContext fc = FrestoContext.createInstance(frestoContextGlobal, uuid);
 	    FrestoTracker.set(fc);
 	}
 
-	public static void createFrestoContext() {
-	    FrestoContext fc = FrestoContext.createInstance();
+	public static void createFrestoContext(FrestoContextGlobal frestoContextGlobal) {
+	    FrestoContext fc = FrestoContext.createInstance(frestoContextGlobal);
 	    FrestoTracker.set(fc);
 	}
 
@@ -72,40 +73,54 @@ public class FrestoTracker {
 	    }
 	}
 
-	public static void captureHttpServletRequest(HttpServletRequest request, String typeName, String signatureName) {
+	public static void captureHttpServletRequest(HttpServletRequest request, String typeName, String signatureName, long timestamp) {
 	    if(!frestoContextExists) {
 		LOGGER.warning("FrestoContext does not exists");
 		return;
 	    }
 
 	    HttpRequestEvent httpRequestEvent = new HttpRequestEvent(
-		request.getMethod(),
-		request.getLocalName(),
-		request.getLocalPort(),
-		request.getContextPath(),
-		request.getServletPath(),
-		//request.getHeader("fresto-uuid"),
-		FrestoTracker.get().getUuid(),
-		typeName,
-		signatureName,
-		System.currentTimeMillis()
+			request.getMethod(),
+			request.getLocalName(),
+			request.getLocalPort(),
+			request.getContextPath(),
+			request.getServletPath(),
+			//request.getHeader("fresto-uuid"),
+			FrestoTracker.get().getUuid(),
+			typeName,
+			signatureName,
+			FrestoTracker.get().getDepth(),
+			timestamp
 		);
 	    // Publish this event to monitoring server
-	    LOGGER.info("HttpServletRequest event: sending");
+	    LOGGER.fine("HttpServletRequest event: sending");
 	    //FrestoTracker.get().publishEventToMonitor("H", httpRequestEvent);
-	    FrestoContextGlobal frestoContextGlobal = (FrestoContextGlobal) (request.getSession().getServletContext().getAttribute("frestoContextGlobal"));
-	    frestoContextGlobal.publishEventToMonitor("H", httpRequestEvent);
-	    LOGGER.info("HttpServletRequest event: sent");
-
-
+	    //FrestoContextGlobal frestoContextGlobal = (FrestoContextGlobal) (request.getSession().getServletContext().getAttribute("frestoContextGlobal"));
+	    FrestoContextGlobal frestoContextGlobal = FrestoTracker.get().getFrestoContextGlobal();
+	    frestoContextGlobal.publishEventToMonitor("HB", httpRequestEvent);
+	    LOGGER.fine("HttpServletRequest event: sent");
 	}
 
-	public static void captureHttpServletResponse(HttpServletResponse response) {
+	public static void captureHttpServletResponse(HttpServletResponse response, String typeName, String signatureName, long timestamp) {
 	    if(!frestoContextExists) {
 		LOGGER.warning("FrestoContext does not exists");
 		return;
 	    }
 
+	    HttpResponseEvent httpResponseEvent = new HttpResponseEvent(
+	    		response.getStatus(),
+			FrestoTracker.get().getUuid(),
+			typeName,
+			signatureName,
+			FrestoTracker.get().getDepth(),
+			timestamp
+		);
+
+	    LOGGER.fine("HttpServletResponse event: sending");
+	    //FrestoContextGlobal frestoContextGlobal = (FrestoContextGlobal) (request.getSession().getServletContext().getAttribute("frestoContextGlobal"));
+	    FrestoContextGlobal frestoContextGlobal = FrestoTracker.get().getFrestoContextGlobal();
+	    frestoContextGlobal.publishEventToMonitor("HE", httpResponseEvent);
+	    LOGGER.fine("HttpServletResponse event: sent");
 	}
 
 }

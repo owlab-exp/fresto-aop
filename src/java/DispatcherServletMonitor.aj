@@ -99,13 +99,20 @@ public aspect DispatcherServletMonitor {
 	    LOGGER.info("[thisJoinPoint.getSignature.name] " + thisJoinPoint.getSignature().getName());
 
 	    String frestoUuid = request.getHeader("fresto-uuid");
+	    FrestoContextGlobal frestoContextGlobal = (FrestoContextGlobal) (request.getSession().getServletContext().getAttribute("frestoContextGlobal"));
 	    if(frestoUuid != null)
-	    	FrestoTracker.createFrestoContext(request.getHeader("fresto-uuid"));
+	    	FrestoTracker.createFrestoContext(frestoContextGlobal, request.getHeader("fresto-uuid"));
 	    else 
-		FrestoTracker.createFrestoContext();
+		FrestoTracker.createFrestoContext(frestoContextGlobal);
 	    LOGGER.info("FrestoContext created");
 
-	    FrestoTracker.captureHttpServletRequest(request, thisJoinPoint.getSignature().getDeclaringTypeName(), thisJoinPoint.getSignature().getName());
+	    FrestoTracker.captureHttpServletRequest(
+	    	request, 
+		thisJoinPoint.getSignature().getDeclaringTypeName(), 
+		thisJoinPoint.getSignature().getName(),
+		System.currentTimeMillis()
+		);
+
 	    LOGGER.info("HttpServletRequest captured");
 
 	    FrestoTracker.beginTrack();
@@ -113,7 +120,13 @@ public aspect DispatcherServletMonitor {
 	    LOGGER.info("Before proceed");
 	    Object result = proceed(request, response);
 	    LOGGER.info("After proceed");
-
+	    
+	    FrestoTracker.captureHttpServletResponse(
+	    	response, 
+		thisJoinPoint.getSignature().getDeclaringTypeName(), 
+		thisJoinPoint.getSignature().getName(),
+		System.currentTimeMillis()
+		);
 	    // Just after proceed
 	    FrestoTracker.endTrack();
 
