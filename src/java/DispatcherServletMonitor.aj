@@ -31,6 +31,7 @@ public aspect DispatcherServletMonitor {
 
 	    FrestoTracker.captureHttpServletRequest(request);
 	    _logger.info("HttpServletRequest captured");
+
 	    FrestoTracker.beginTrack();
 
 	    Object result = proceed(request, response);

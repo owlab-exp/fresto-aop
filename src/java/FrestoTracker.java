@@ -17,13 +17,13 @@ public class FrestoTracker {
 	public static void set(FrestoContext fc) {
 	    threadLocal.set(fc);
 	    frestoContextExists = true;
-	    LOGGER.info("Set fresto context");
+	    LOGGER.fine("Set fresto context");
 	}
 
 	public static void unset() {
 	    threadLocal.remove();
 	    frestoContextExists = false;
-	    LOGGER.info("Unset fresto context");
+	    LOGGER.fine("Unset fresto context");
 	}
 
 	public static FrestoContext get() {
@@ -31,7 +31,7 @@ public class FrestoTracker {
 		LOGGER.warning("FrestoCotnext does not exist");
 		return null;
 	    }
-	    LOGGER.info("Get fresto context");
+	    LOGGER.fine("Get fresto context");
 	    return threadLocal.get();
 	}
 
@@ -86,8 +86,10 @@ public class FrestoTracker {
 		FrestoTracker.get().getUuid(),
 		System.currentTimeMillis()
 		);
+	    // Publish this event to monitoring server
+	    LOGGER.info("HttpServletRequest event: sending");
 	    FrestoTracker.get().publishEventToMonitor("H", httpRequestEvent);
-	    LOGGER.info("HttpServlerRequest event sent");
+	    LOGGER.info("HttpServletRequest event: sent");
 
 
 	}

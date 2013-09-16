@@ -32,7 +32,7 @@ public class FrestoContext {
     private TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
 
     private FrestoContext(String uuid, int uuidCreator) {
-	LOGGER.info("uuid: " + uuid + ", uuidCreator: " + uuidCreator);
+	LOGGER.fine("uuid: " + uuid + ", uuidCreator: " + uuidCreator);
 	this.uuid = uuid;
 
 	this.uuidCreator = uuidCreator;
@@ -40,6 +40,9 @@ public class FrestoContext {
 	this.zmqContext = ZMQ.context(1);
 	this.publisher = this.zmqContext.socket(ZMQ.PUB);
 	this.publisher.connect("tcp://" + pubHost + ":" + pubPort);
+	//this.publisher.connect("tcp://fresto1.owlab.com:7002");
+	this.publisher.send("H".getBytes(), ZMQ.SNDMORE);
+	this.publisher.send("HI This is Seoul".getBytes(), 0);
 
 	LOGGER.info("JeroMQ publisher uses " + pubHost + ":" + pubPort );
 
@@ -47,17 +50,21 @@ public class FrestoContext {
     }
 
     public static FrestoContext createInstance(String uuid) {
-	LOGGER.info("uuid: " + uuid);
+	LOGGER.fine("uuid: " + uuid);
 	return new FrestoContext(uuid, FrestoContext.UUID_CREATOR_UI);
     }
 
     public static FrestoContext createInstance() {
-	LOGGER.info("no uuid");
+	LOGGER.fine("no uuid");
 	return new FrestoContext(UUID.randomUUID().toString(), FrestoContext.UUID_CREATOR_AP);
     }
 
     public void close() {
-	LOGGER.info("Closing ZMQ socket");
+	if(!isInitialized) {
+	    LOGGER.warning("FrestoContext is not initialized");
+	    return;
+	}
+	LOGGER.fine("Closing ZMQ socket");
 	this.publisher.close();
 	this.zmqContext.term();
     }
@@ -84,7 +91,7 @@ public class FrestoContext {
 	    return -1;
 	}
 	depth++;
-	LOGGER.info("[depth] " + depth);
+	LOGGER.fine("[depth] " + depth);
 	return depth;
     }
 
@@ -94,7 +101,7 @@ public class FrestoContext {
 	    return -1;
 	}
 	depth--;
-	LOGGER.info("[depth] " + depth);
+	LOGGER.fine("[depth] " + depth);
 	return depth;
     }
 
@@ -121,10 +128,10 @@ public class FrestoContext {
 	}
 	
 	//byte[] serializedEvent = serializer.serialize(httpServletRequestEvent);
-	LOGGER.info("eventBytes: " + eventBytes.length + " bytes");
+	LOGGER.info("[eventBytes ] " + eventBytes.length + " bytes");
 	this.publisher.send(envelope.getBytes(), ZMQ.SNDMORE);
 	this.publisher.send(eventBytes, 0);
-	LOGGER.info("Event sent");
+	LOGGER.info("[eventBytes ] sent");
 	
     }
 }
