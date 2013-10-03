@@ -4,8 +4,13 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import fresto.event.HttpRequestEvent;
-import fresto.event.HttpResponseEvent;
+import fresto.data.ResourceID;
+import fresto.data.OperationID;
+import fresto.data.EntryOperationCallEdge;
+import fresto.data.EntryOperationReturnEdge;
+import fresto.data.DataUnit;
+import fresto.data.Pedigree;
+import fresto.data.FrestoData;
 
 public class FrestoTracker {
 	private static Logger LOGGER = Logger.getLogger("FrestoTracker");
@@ -64,7 +69,7 @@ public class FrestoTracker {
 	    }
 	    // decrease depth of context object
 
-	    LOGGER.info("FrestoCotnext exists");
+	    LOGGER.fine("FrestoCotnext exists");
 	    int depth = FrestoTracker.get().decreaseDepth();
 	    if(depth == 0) {
 		// Call close to close the ZMQ socket
@@ -79,48 +84,68 @@ public class FrestoTracker {
 		return;
 	    }
 
-	    HttpRequestEvent httpRequestEvent = new HttpRequestEvent(
-			request.getMethod(),
-			request.getLocalName(),
-			request.getLocalPort(),
-			request.getContextPath(),
-			request.getServletPath(),
-			//request.getHeader("fresto-uuid"),
-			FrestoTracker.get().getUuid(),
-			typeName,
-			signatureName,
-			FrestoTracker.get().getDepth(),
-			timestamp
-		);
+	    OperationID operationId = new OperationID();
+	    operationId.setTypeName(typeName);
+	    operationId.setOperationName(signatureName);
+
+	    ResourceID resourceId = ResourceID.url(request.getRequestURL().toString());
+
+	    EntryOperationCallEdge entryOperationCallEdge = new EntryOperationCallEdge();
+	    entryOperationCallEdge.setResourceId(resourceId);
+	    entryOperationCallEdge.setOperationId(operationId);
+	    entryOperationCallEdge.setLocalHost(request.getLocalName());
+	    entryOperationCallEdge.setLocalPort(request.getLocalPort());
+	    entryOperationCallEdge.setContextPath(request.getContextPath());
+	    entryOperationCallEdge.setServletPath(request.getServletPath());
+	    entryOperationCallEdge.setHttpMethod(request.getMethod());
+	    entryOperationCallEdge.setTimestamp(timestamp);
+	    entryOperationCallEdge.setUuid(FrestoTracker.get().getUuid());
+
+	    Pedigree pedigree = new Pedigree();
+	    pedigree.setReceivedTime(System.currentTimeMillis());
+
+	    FrestoData frestoData = new FrestoData();
+	    frestoData.setDataUnit(DataUnit.entryOperationCallEdge(entryOperationCallEdge));
+	    frestoData.setPedigree(pedigree);
 	    // Publish this event to monitoring server
-	    LOGGER.fine("HttpServletRequest event: sending");
-	    //FrestoTracker.get().publishEventToMonitor("H", httpRequestEvent);
-	    //FrestoContextGlobal frestoContextGlobal = (FrestoContextGlobal) (request.getSession().getServletContext().getAttribute("frestoContextGlobal"));
+	    LOGGER.fine("EntryOperationCallEdge event: sending");
 	    FrestoContextGlobal frestoContextGlobal = FrestoTracker.get().getFrestoContextGlobal();
-	    frestoContextGlobal.publishEventToMonitor("HB", httpRequestEvent);
-	    LOGGER.fine("HttpServletRequest event: sent");
+	    frestoContextGlobal.publishEventToMonitor("EB", frestoData);
+	    LOGGER.fine("EntryOperationCallEdge event: sent");
 	}
 
-	public static void captureHttpServletResponse(HttpServletResponse response, String typeName, String signatureName, long timestamp) {
+	public static void captureHttpServletResponse(HttpServletRequest request, HttpServletResponse response, String typeName, String signatureName, long timestamp) {
 	    if(!frestoContextExists) {
 		LOGGER.warning("FrestoContext does not exists");
 		return;
 	    }
 
-	    HttpResponseEvent httpResponseEvent = new HttpResponseEvent(
-	    		response.getStatus(),
-			FrestoTracker.get().getUuid(),
-			typeName,
-			signatureName,
-			FrestoTracker.get().getDepth(),
-			timestamp
-		);
+	    OperationID operationId = new OperationID();
+	    operationId.setTypeName(typeName);
+	    operationId.setOperationName(signatureName);
 
-	    LOGGER.fine("HttpServletResponse event: sending");
-	    //FrestoContextGlobal frestoContextGlobal = (FrestoContextGlobal) (request.getSession().getServletContext().getAttribute("frestoContextGlobal"));
+	    ResourceID resourceId = ResourceID.url(request.getRequestURL().toString());
+
+	    EntryOperationReturnEdge entryOperationReturnEdge = new EntryOperationReturnEdge();
+	    entryOperationReturnEdge.setOperationId(operationId);
+	    entryOperationReturnEdge.setResourceId(resourceId);
+	    entryOperationReturnEdge.setHttpStatus(response.getStatus());
+	    int elapsedTime = (int)(timestamp - FrestoTracker.get().getStartTime());
+	    entryOperationReturnEdge.setElapsedTime(elapsedTime);
+	    entryOperationReturnEdge.setTimestamp(timestamp);
+	    entryOperationReturnEdge.setUuid(FrestoTracker.get().getUuid());
+
+	    Pedigree pedigree = new Pedigree();
+	    pedigree.setReceivedTime(System.currentTimeMillis());
+
+	    FrestoData frestoData = new FrestoData();
+	    frestoData.setDataUnit(DataUnit.entryOperationReturnEdge(entryOperationReturnEdge));
+	    frestoData.setPedigree(pedigree);
+	    // Publish this event to monitoring server
+	    LOGGER.fine("EntryOperationReturnEdge event: sending");
 	    FrestoContextGlobal frestoContextGlobal = FrestoTracker.get().getFrestoContextGlobal();
-	    frestoContextGlobal.publishEventToMonitor("HE", httpResponseEvent);
-	    LOGGER.fine("HttpServletResponse event: sent");
+	    frestoContextGlobal.publishEventToMonitor("EF", frestoData);
+	    LOGGER.fine("EntryOperationReturnEdge event: sent");
 	}
 
 }

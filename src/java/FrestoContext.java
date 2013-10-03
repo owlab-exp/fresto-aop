@@ -23,6 +23,7 @@ public class FrestoContext {
     private boolean isInitialized = false;
 
     private int depth = 0;
+    private long startTime = -1L;
 
     private FrestoContextGlobal frestoContextGlobal;
 
@@ -121,27 +122,19 @@ public class FrestoContext {
 	return this.depth;
     }
 
-    //public void publishEventToMonitor(String envelope, TBase base) {
-    //    if(!isInitialized) {
-    //        LOGGER.warning("FrestoContext is not initialized");
-    //        return;
-    //    }
+    public void setStartTime(long timestamp) {
+	if(!isInitialized) {
+	    LOGGER.warning("FrestoContext is not initialized");
+	    return;
+	}
+	this.startTime = timestamp;
+    }
 
-    //    byte[] eventBytes = null;
-    //    try {
-    //        eventBytes = serializer.serialize(base);
-    //    } catch(TException te) {
-    //        LOGGER.warning("TSerializer exception: " + te.getMessage());
-    //        return;
-    //    }
-    //    
-    //    //byte[] serializedEvent = serializer.serialize(httpServletRequestEvent);
-    //    LOGGER.info("[eventBytes ] " + eventBytes.length + " bytes");
-    //    this.publisher.send(envelope.getBytes(), ZMQ.SNDMORE);
-    //    this.publisher.send(eventBytes, 0);
-
-    //    //LOGGER.info("[eventBytes ] sent " + i + " count");
-    //    LOGGER.info("[eventBytes ] sent ");
-    //    
-    //}
+    public long getStartTime() {
+	if(!isInitialized) {
+	    LOGGER.warning("FrestoContext is not initialized");
+	    return -1L;
+	}
+	return this.startTime;
+    }
 }

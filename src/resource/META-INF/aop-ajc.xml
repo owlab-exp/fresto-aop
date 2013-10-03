@@ -1,6 +1,7 @@
 <aspectj>
 	<aspects>
-		<aspect name="fresto.aspects.DispatcherServletMonitor"/>
+		<aspect name="fresto.aspects.ServletMonitor"/>
+		<aspect name="fresto.aspects.SpringDispatcherServletMonitor"/>
 		<!--
 		<aspect name="fresto.aspects.SpringMVCMonitor"/>
 		<aspect name="fresto.aspects.DAOMonitor"/>
