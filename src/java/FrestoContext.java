@@ -27,14 +27,6 @@ public class FrestoContext {
 
     private FrestoContextGlobal frestoContextGlobal;
 
-    //private static String pubHost = "fresto1.owlab.com";
-    ////private static String pubHost = "*";
-    //private static int pubPort = 7002;
-    //private ZMQ.Context zmqContext; //= ZMQ.context(1);
-    //private ZMQ.Socket publisher;
-
-    //private TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory());
-
     private FrestoContext(FrestoContextGlobal frestoContextGlobal, String uuid, int uuidCreator) {
 	LOGGER.fine("uuid: " + uuid + ", uuidCreator: " + uuidCreator);
 	this.uuid = uuid;

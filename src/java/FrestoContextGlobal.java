@@ -16,7 +16,7 @@ public class FrestoContextGlobal {
     private static Logger _logger = Logger.getLogger("FrestoContextGlobal");
 
     private String pubHost = "fresto1.owlab.com";
-    private int pubPort = 7002;
+    private int pubPort = 7000;
     private ZMQ.Context zmqContext;
     private ZMQ.Socket publisher;
     private TSerializer serializer;

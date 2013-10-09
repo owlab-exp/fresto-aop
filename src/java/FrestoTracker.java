@@ -129,6 +129,7 @@ public class FrestoTracker {
 	    EntryOperationReturnEdge entryOperationReturnEdge = new EntryOperationReturnEdge();
 	    entryOperationReturnEdge.setOperationId(operationId);
 	    entryOperationReturnEdge.setResourceId(resourceId);
+	    entryOperationReturnEdge.setServletPath(request.getServletPath());
 	    entryOperationReturnEdge.setHttpStatus(response.getStatus());
 	    int elapsedTime = (int)(timestamp - FrestoTracker.get().getStartTime());
 	    entryOperationReturnEdge.setElapsedTime(elapsedTime);
