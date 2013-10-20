@@ -2,8 +2,8 @@
 	<aspects>
 		<aspect name="fresto.aspects.ServletMonitor"/>
 		<aspect name="fresto.aspects.SpringDispatcherServletMonitor"/>
-		<!--
 		<aspect name="fresto.aspects.SpringMVCMonitor"/>
+		<!--
 		<aspect name="fresto.aspects.DAOMonitor"/>
 		<aspect name="fresto.aspects.JdbcConnectionMonitor"/>
 		<aspect name="fresto.aspects.JdbcStatementMonitor"/>

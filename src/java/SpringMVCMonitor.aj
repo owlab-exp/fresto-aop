@@ -26,7 +26,7 @@ public aspect SpringMVCMonitor {
 	//execution(ModelAndView handleRequest*(..));
 	execution(* *.*Service.*(..));
 
-    public pointcut springHandle(HttpServletRequest request, HttpServletResponse response) :
+    public pointcut springHandleRequest(HttpServletRequest request, HttpServletResponse response) :
 	execution(ModelAndView handleRequest*(HttpServletRequest, HttpServletResponse)) && args (request, response);
 	//execution(* handleRequest(HttpServletRequest, HttpServletResponse)) && args (request, response);
 
@@ -40,7 +40,7 @@ public aspect SpringMVCMonitor {
 
     Object around() :
 	springControllerHandle() {
-	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[controllerHandler thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
 	    FrestoTracker.beginTrack();
 	    Object result = proceed();
@@ -51,7 +51,7 @@ public aspect SpringMVCMonitor {
 
     Object around() :
 	springDomainService() {
-	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[domainService thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
 	    FrestoTracker.beginTrack();
 	    Object result = proceed();
@@ -62,7 +62,7 @@ public aspect SpringMVCMonitor {
 
     Object around(String methodName, HttpServletRequest request, HttpServletResponse response) :
     	springMultiActionInvokeMethodName(methodName, request, response) {
-	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+	    LOGGER.info("[multiActionInvoke thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
 	    FrestoTracker.beginTrack();
 	    Object result = proceed(methodName, request, response);
@@ -76,8 +76,8 @@ public aspect SpringMVCMonitor {
     Object around(HttpServletRequest request, HttpServletResponse response):
     	//springMultiAction(request, response) {
     	//springController(request, response) {
-    	springHandle(request, response) {
-	    LOGGER.info("[thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
+    	springHandleRequest(request, response) {
+	    LOGGER.info("[handler thisJoinPoint.getSignature] " + thisJoinPoint.getSignature());
 
 	    FrestoTracker.beginTrack();
 	    Object result = proceed(request, response);
