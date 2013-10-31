@@ -1,3 +1,14 @@
+/**************************************************************************************
+ * Copyright 2013 TheSystemIdeas, Inc and Contributors. All rights reserved.          *
+ *                                                                                    *
+ *     https://github.com/owlab/fresto                                                *
+ *                                                                                    *
+ *                                                                                    *
+ * ---------------------------------------------------------------------------------- *
+ * This file is licensed under the Apache License, Version 2.0 (the "License");       *
+ * you may not use this file except in compliance with the License.                   *
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 * 
+ **************************************************************************************/
 package fresto.aspects;
 
 import java.util.UUID;
@@ -12,6 +23,9 @@ import org.apache.thrift.TBase;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 
+/**
+ * Context information, an object of this last till a call flow - thread
+ */
 public class FrestoContext {
     private static Logger LOGGER = Logger.getLogger("FrestoContext");
 
@@ -22,48 +36,55 @@ public class FrestoContext {
     private String uuid = null;
     private boolean isInitialized = false;
 
+	// This will be increased to 1 at the starting point
+	// Thus, after a while, if this become to 1, then it means all the operations completed.
     private int depth = 0;
+
+	// This will be also increased to 1 at the starting point
+	// However this can be larger than depth, because this reflects just length of a call path.
+	private int sequence = 0;
+
     private long startTime = -1L;
 
     private FrestoContextGlobal frestoContextGlobal;
 
     private FrestoContext(FrestoContextGlobal frestoContextGlobal, String uuid, int uuidCreator) {
-	LOGGER.fine("uuid: " + uuid + ", uuidCreator: " + uuidCreator);
-	this.uuid = uuid;
+		LOGGER.fine("uuid: " + uuid + ", uuidCreator: " + uuidCreator);
+		this.uuid = uuid;
 
-	this.uuidCreator = uuidCreator;
-	this.frestoContextGlobal = frestoContextGlobal;
+		this.uuidCreator = uuidCreator;
+		this.frestoContextGlobal = frestoContextGlobal;
 
-//	this.zmqContext = ZMQ.context(1);
-//	this.publisher = this.zmqContext.socket(ZMQ.PUB);
-//	//this.publisher.connect("tcp://" + pubHost + ":" + pubPort);
-//	this.publisher.connect("tcp://fresto1.owlab.com:7002");
-//	//this.publisher.send("H".getBytes(), ZMQ.SNDMORE);
-//	//this.publisher.send("HI This is Seoul".getBytes(), 0);
+//		this.zmqContext = ZMQ.context(1);
+//		this.publisher = this.zmqContext.socket(ZMQ.PUB);
+//		//this.publisher.connect("tcp://" + pubHost + ":" + pubPort);
+//		this.publisher.connect("tcp://fresto1.owlab.com:7002");
+//		//this.publisher.send("H".getBytes(), ZMQ.SNDMORE);
+//		//this.publisher.send("HI This is Seoul".getBytes(), 0);
 //
-//	LOGGER.info("JeroMQ publisher uses " + pubHost + ":" + pubPort );
+//		LOGGER.info("JeroMQ publisher uses " + pubHost + ":" + pubPort );
 
-	this.isInitialized = true;
+		this.isInitialized = true;
     }
 
     public static FrestoContext createInstance(FrestoContextGlobal frestoContextGlobal, String uuid) {
-	LOGGER.fine("uuid: " + uuid);
-	return new FrestoContext(frestoContextGlobal, uuid, FrestoContext.UUID_CREATOR_UI);
+		LOGGER.fine("uuid: " + uuid);
+		return new FrestoContext(frestoContextGlobal, uuid, FrestoContext.UUID_CREATOR_UI);
     }
 
     public static FrestoContext createInstance(FrestoContextGlobal frestoContextGlobal) {
-	LOGGER.fine("no uuid");
-	return new FrestoContext(frestoContextGlobal, UUID.randomUUID().toString(), FrestoContext.UUID_CREATOR_AP);
+		LOGGER.fine("no uuid");
+		return new FrestoContext(frestoContextGlobal, UUID.randomUUID().toString(), FrestoContext.UUID_CREATOR_AP);
     }
 
     public FrestoContextGlobal getFrestoContextGlobal() {
-	return this.frestoContextGlobal;
+		return this.frestoContextGlobal;
     }
 
     public void close() {
-	if(!isInitialized) {
-	    LOGGER.warning("FrestoContext is not initialized");
-	    return;
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return;
 	}
 	//LOGGER.fine("Closing ZMQ socket");
 	//this.publisher.close();
@@ -71,62 +92,83 @@ public class FrestoContext {
     }
     
     public int getUUIDCreator() {
-	if(!isInitialized) {
-	    LOGGER.warning("FrestoContext is not initialized");
-	    return -1;
-	}
-	return this.uuidCreator;
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return -1;
+		}
+		return this.uuidCreator;
     }
 
     public String getUuid() {
-	if(!isInitialized) {
-	    LOGGER.warning("FrestoContext is not initialized");
-	    return null;
-	}
-	return this.uuid;
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return null;
+		}
+		return this.uuid;
     }
 
-    public int increaseDepth() {
-	if(!isInitialized) {
-	    LOGGER.warning("FrestoContext is not initialized");
-	    return -1;
-	}
-	depth++;
-	LOGGER.fine("[depth] " + depth);
-	return depth;
+    public int setDepth(int depth) {
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return -1;
+		}
+		this.depth = depth;
+		LOGGER.fine("[depth] " + depth);
+		return depth;
     }
 
-    public int decreaseDepth() {
-	if(!isInitialized) {
-	    LOGGER.warning("FrestoContext is not initialized");
-	    return -1;
-	}
-	depth--;
-	LOGGER.fine("[depth] " + depth);
-	return depth;
+	// This is deprecated.- 20131030
+    private int decreaseDepth() {
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return -1;
+		}
+		depth--;
+		LOGGER.fine("[depth] " + depth);
+		return depth;
     }
 
     public int getDepth() {
-	if(!isInitialized) {
-	    LOGGER.warning("FrestoContext is not initialized");
-	    return -1;
-	}
-	return this.depth;
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return -1;
+		}
+		return this.depth;
     }
 
-    public void setStartTime(long timestamp) {
-	if(!isInitialized) {
-	    LOGGER.warning("FrestoContext is not initialized");
-	    return;
-	}
-	this.startTime = timestamp;
+    public int increaseSequence() {
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return -1;
+		}
+		sequence++;
+		LOGGER.fine("[sequence] " + sequence);
+		return sequence;
     }
 
-    public long getStartTime() {
-	if(!isInitialized) {
-	    LOGGER.warning("FrestoContext is not initialized");
-	    return -1L;
-	}
-	return this.startTime;
+    public int getSequence() {
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return -1;
+		}
+		return this.sequence;
+    }
+
+	// Deprecated
+    private void setStartTime(long timestamp) {
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return;
+		}
+		this.startTime = timestamp;
+    }
+
+	// Deprecated
+    private long getStartTime() {
+		if(!isInitialized) {
+		    LOGGER.warning("FrestoContext is not initialized");
+		    return -1L;
+		}
+		return this.startTime;
     }
 }

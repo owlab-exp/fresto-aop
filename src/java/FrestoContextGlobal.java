@@ -1,3 +1,14 @@
+/**************************************************************************************
+ * Copyright 2013 TheSystemIdeas, Inc and Contributors. All rights reserved.          *
+ *                                                                                    *
+ *     https://github.com/owlab/fresto                                                *
+ *                                                                                    *
+ *                                                                                    *
+ * ---------------------------------------------------------------------------------- *
+ * This file is licensed under the Apache License, Version 2.0 (the "License");       *
+ * you may not use this file except in compliance with the License.                   *
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 * 
+ **************************************************************************************/
 package fresto.aspects;
 
 import java.util.logging.Logger;
@@ -22,34 +33,34 @@ public class FrestoContextGlobal {
     private TSerializer serializer;
 
     public FrestoContextGlobal() {
-	_logger.info("Initializing...");
+		_logger.info("Initializing...");
 
-	zmqContext = ZMQ.context(1);
-	publisher = zmqContext.socket(ZMQ.PUB);
-	publisher.connect("tcp://" + pubHost + ":" + pubPort);
+		zmqContext = ZMQ.context(1);
+		publisher = zmqContext.socket(ZMQ.PUB);
+		publisher.connect("tcp://" + pubHost + ":" + pubPort);
 
-	serializer = new TSerializer(new TBinaryProtocol.Factory());
+		serializer = new TSerializer(new TBinaryProtocol.Factory());
 
 
-	_logger.info("Started with JeroMQ(" + pubHost + ":" + pubPort + ")");
+		_logger.info("Started with JeroMQ(" + pubHost + ":" + pubPort + ")");
     }
 
     public void close() {
-	_logger.info("Closing...");
-	publisher.close();
-	zmqContext.term();
+		_logger.info("Closing...");
+		publisher.close();
+		zmqContext.term();
     }
 
     public synchronized void publishEventToMonitor(String topic, TBase base) {
-	byte[] eventBytes = null;
-	try {
-	    eventBytes = serializer.serialize(base);
-	} catch(TException te) {
-	    _logger.warning("Exceptio occurred: " + te.getMessage());
-	    return;
-	}
+		byte[] eventBytes = null;
+		try {
+		    eventBytes = serializer.serialize(base);
+		} catch(TException te) {
+		    _logger.warning("Exceptio occurred: " + te.getMessage());
+		    return;
+		}
 
-	publisher.send(topic.getBytes(), ZMQ.SNDMORE);
-	publisher.send(eventBytes, 0);
+		publisher.send(topic.getBytes(), ZMQ.SNDMORE);
+		publisher.send(eventBytes, 0);
     }
 }

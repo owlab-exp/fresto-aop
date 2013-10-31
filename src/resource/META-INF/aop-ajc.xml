@@ -1,9 +1,12 @@
 <aspectj>
 	<aspects>
-		<aspect name="fresto.aspects.ServletMonitor"/>
-		<aspect name="fresto.aspects.SpringDispatcherServletMonitor"/>
-		<aspect name="fresto.aspects.SpringMVCMonitor"/>
-		<!--
+		<aspect name="fresto.aspects.ServletContextInitializer"/>
+		<aspect name="fresto.aspects.SpringDispatcherServletAspect"/>
+		<aspect name="fresto.aspects.SpringMVCAspect"/>
+		<aspect name="fresto.aspects.SQLExecutionAspect"/>
+		<!-- 
+		-->
+		<!-- 
 		<aspect name="fresto.aspects.DAOMonitor"/>
 		<aspect name="fresto.aspects.JdbcConnectionMonitor"/>
 		<aspect name="fresto.aspects.JdbcStatementMonitor"/>
