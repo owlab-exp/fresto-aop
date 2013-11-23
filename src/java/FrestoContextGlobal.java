@@ -12,6 +12,8 @@
 package fresto.aspects;
 
 import java.util.logging.Logger;
+import java.util.Properties;
+import java.io.IOException;
 
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Context;
@@ -26,14 +28,30 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 public class FrestoContextGlobal {
     private static Logger _logger = Logger.getLogger("FrestoContextGlobal");
 
-    private String pubHost = "fresto1.owlab.com";
-    private int pubPort = 7000;
+    private String pubHost = null;
+    private String pubPort = null;
     private ZMQ.Context zmqContext;
     private ZMQ.Socket publisher;
     private TSerializer serializer;
 
     public FrestoContextGlobal() {
 		_logger.info("Initializing...");
+		Properties properties = new Properties();
+		try {
+			properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("fresto.properties"));
+		} catch(IOException ioe) {
+			_logger.severe("Error loading fresto.properties: " + ioe.getMessage());
+		}
+		String eventHubHostName = properties.getProperty("eventhub.hostname");
+		String eventHubPort = properties.getProperty("eventhub.port");
+		if(eventHubHostName == null || eventHubPort == null) {
+			_logger.severe("No event hub host/port defined. Dummy local host/port will be used");
+			pubHost = "localhost";
+			pubPort = "7000";
+		} else {
+			pubHost = eventHubHostName;
+			pubPort = eventHubPort;
+		}
 
 		zmqContext = ZMQ.context(1);
 		publisher = zmqContext.socket(ZMQ.PUB);

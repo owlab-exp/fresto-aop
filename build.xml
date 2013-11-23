@@ -94,11 +94,13 @@
 <target name="deploy" depends="dist" description="Deploy on TCServer Library Directory">
 	<copy todir="${tcserver.home}/lib" overwrite="true" flatten="true">
 		<file file="${dist.home}/${jar.name}.jar"/>
+		<file file="${basedir}/fresto.properties"/>
 	</copy>
 </target>
 
 <target name="undeploy"  description="Un-Deploy on TCServer Library Directory">
 	<delete file="${tcserver.home}/lib/${jar.name}.jar"/>
+	<delete file="${tcserver.home}/lib/fresto.properties"/>
 </target>
 
 </project> 
